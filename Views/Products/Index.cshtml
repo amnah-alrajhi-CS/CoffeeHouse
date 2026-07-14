@@ -1,0 +1,148 @@
+@model IEnumerable<CoffeeHouse.Models.Product>
+
+@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="container page-container">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title mb-1">Our Menu</h1>
+            <p class="text-muted mb-0">
+                Search and explore our coffee, desserts and bakery products.
+            </p>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>
+            Add Product
+        </a>
+    </div>
+
+    <div class="content-card mb-4">
+        <form asp-action="Index" method="get">
+            <div class="row g-3 align-items-end">
+
+                <div class="col-md-5">
+                    <label class="form-label">Search</label>
+                    <input type="text"
+                           name="searchString"
+                           value="@ViewBag.SearchString"
+                           class="form-control"
+                           placeholder="Search by name or description..." />
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Category</label>
+                    <select name="categoryId"
+                            class="form-select"
+                            asp-items="ViewBag.CategoryId">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit"
+                            class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-search me-1"></i>
+                        Search
+                    </button>
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Reset
+                    </a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="content-card text-center">
+            <h4>No products found</h4>
+            <p class="text-muted mb-3">
+                Try another search or add a new product.
+            </p>
+
+            <a asp-action="Create" class="btn btn-primary">
+                Add Product
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+
+            @foreach (var item in Model)
+            {
+                <div class="col-sm-6 col-lg-4">
+
+                    <div class="card product-card h-100 border-0 shadow-sm">
+
+                        <img src="~/images/products/@item.ImageUrl"
+                             class="card-img-top product-image"
+                             alt="@item.Name"
+                             onerror="this.src='/images/products/default.jpg';" />
+
+                        <div class="card-body d-flex flex-column">
+
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+
+                                <h4 class="card-title mb-0">
+                                    @item.Name
+                                </h4>
+
+                                <span class="badge rounded-pill product-category">
+                                    @(item.Category?.Name ?? "No Category")
+                                </span>
+
+                            </div>
+
+                            <p class="card-text text-muted flex-grow-1">
+                                @(string.IsNullOrWhiteSpace(item.Description)
+                                    ? "No description available."
+                                    : item.Description)
+                            </p>
+
+                            <div class="mb-3">
+                                <span class="product-price">
+                                    @item.Price.ToString("0.00") SAR
+                                </span>
+                            </div>
+
+                            <div class="d-flex gap-2 flex-wrap">
+
+                                <a asp-action="Details"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-outline-primary btn-sm">
+                                    Details
+                                </a>
+
+                                <a asp-action="Edit"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-outline-warning btn-sm">
+                                    Edit
+                                </a>
+
+                                <a asp-action="Delete"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-outline-danger btn-sm">
+                                    Delete
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>

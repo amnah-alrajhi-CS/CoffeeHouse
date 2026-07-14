@@ -1,0 +1,109 @@
+﻿@{
+    ViewData["Title"] = "Coffee House";
+}
+
+<div class="container page-container">
+
+    <div class="content-card text-center">
+
+        <h1 class="display-3 fw-bold mb-3">
+            Coffee House
+        </h1>
+
+        <p class="lead mb-4">
+            Welcome to our coffee shop.
+            Enjoy fresh coffee made with passion every day.
+        </p>
+
+        <div class="d-flex justify-content-center gap-3">
+
+            <a asp-controller="Products"
+               asp-action="Index"
+               class="btn btn-primary btn-lg">
+                View Menu
+            </a>
+
+            <a asp-controller="Categories"
+               asp-action="Index"
+               class="btn btn-outline-primary btn-lg">
+                Categories
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="row mt-5">
+
+        <div class="col-md-4 mb-4">
+
+            <div class="card shadow h-100">
+
+                <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600"
+                     class="card-img-top"
+                     height="250"
+                     style="object-fit:cover;">
+
+                <div class="card-body">
+
+                    <h4>Hot Coffee</h4>
+
+                    <p>
+                        Fresh espresso, latte and cappuccino.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4 mb-4">
+
+            <div class="card shadow h-100">
+
+                <img src="https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=600"
+                     class="card-img-top"
+                     height="250"
+                     style="object-fit:cover;">
+
+                <div class="card-body">
+
+                    <h4>Cold Drinks</h4>
+
+                    <p>
+                        Iced coffee and refreshing beverages.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4 mb-4">
+
+            <div class="card shadow h-100">
+
+                <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600"
+                     class="card-img-top"
+                     height="250"
+                     style="object-fit:cover;">
+
+                <div class="card-body">
+
+                    <h4>Desserts</h4>
+
+                    <p>
+                        Cakes, cookies and delicious sweets.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
