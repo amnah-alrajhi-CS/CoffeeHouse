@@ -9,14 +9,19 @@ namespace CoffeeHouse.Controllers
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public ProductsController(ApplicationDbContext context)
+        public ProductsController(
+            ApplicationDbContext context,
+            IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
-        // GET: Products
-        public async Task<IActionResult> Index(string? searchString, int? categoryId)
+        public async Task<IActionResult> Index(
+            string? searchString,
+            int? categoryId)
         {
             var products = _context.Products
                 .Include(p => p.Category)
@@ -54,7 +59,6 @@ namespace CoffeeHouse.Controllers
             );
         }
 
-        // GET: Products/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -74,7 +78,6 @@ namespace CoffeeHouse.Controllers
             return View(product);
         }
 
-        // GET: Products/Create
         public IActionResult Create()
         {
             ViewData["CategoryId"] = new SelectList(
@@ -86,13 +89,17 @@ namespace CoffeeHouse.Controllers
             return View();
         }
 
-        // POST: Products/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            [Bind("Id,Name,Price,Description,ImageUrl,CategoryId")]
-            Product product)
+        public async Task<IActionResult> Create(Product product)
         {
+            if (product.ImageFile != null &&
+                product.ImageFile.Length > 0)
+            {
+                product.ImageUrl =
+                    await SaveImageAsync(product.ImageFile);
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(product);
@@ -111,7 +118,6 @@ namespace CoffeeHouse.Controllers
             return View(product);
         }
 
-        // GET: Products/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -136,17 +142,35 @@ namespace CoffeeHouse.Controllers
             return View(product);
         }
 
-        // POST: Products/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             int id,
-            [Bind("Id,Name,Price,Description,ImageUrl,CategoryId")]
             Product product)
         {
             if (id != product.Id)
             {
                 return NotFound();
+            }
+
+            var existingProduct = await _context.Products
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (existingProduct == null)
+            {
+                return NotFound();
+            }
+
+            if (product.ImageFile != null &&
+                product.ImageFile.Length > 0)
+            {
+                product.ImageUrl =
+                    await SaveImageAsync(product.ImageFile);
+            }
+            else
+            {
+                product.ImageUrl = existingProduct.ImageUrl;
             }
 
             if (ModelState.IsValid)
@@ -179,7 +203,6 @@ namespace CoffeeHouse.Controllers
             return View(product);
         }
 
-        // GET: Products/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -199,7 +222,6 @@ namespace CoffeeHouse.Controllers
             return View(product);
         }
 
-        // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -213,6 +235,39 @@ namespace CoffeeHouse.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private async Task<string> SaveImageAsync(
+            IFormFile imageFile)
+        {
+            var folderPath = Path.Combine(
+                _environment.WebRootPath,
+                "images",
+                "products"
+            );
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            var extension =
+                Path.GetExtension(imageFile.FileName);
+
+            var fileName =
+                $"{Guid.NewGuid()}{extension}";
+
+            var fullPath =
+                Path.Combine(folderPath, fileName);
+
+            await using var stream = new FileStream(
+                fullPath,
+                FileMode.Create
+            );
+
+            await imageFile.CopyToAsync(stream);
+
+            return fileName;
         }
 
         private bool ProductExists(int id)

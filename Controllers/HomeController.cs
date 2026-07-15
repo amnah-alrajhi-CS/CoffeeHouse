@@ -1,24 +1,46 @@
-using System.Diagnostics;
+using CoffeeHouse.Data;
 using Microsoft.AspNetCore.Mvc;
-using CoffeeHouse.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace CoffeeHouse.Controllers;
-
-public class HomeController : Controller
+namespace CoffeeHouse.Controllers
 {
-    public IActionResult Index()
+    public class HomeController : Controller
     {
-        return View();
-    }
+        private readonly ApplicationDbContext _context;
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+        public HomeController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        public async Task<IActionResult> Index()
+        {
+            ViewBag.TotalProducts = await _context.Products.CountAsync();
+            ViewBag.TotalCategories = await _context.Categories.CountAsync();
+
+            ViewBag.DrinksCount = await _context.Products
+                .CountAsync(p =>
+                    p.Category != null &&
+                    (p.Category.Name.Contains("Coffee") ||
+                     p.Category.Name.Contains("Drink")));
+
+            ViewBag.DessertsCount = await _context.Products
+                .CountAsync(p =>
+                    p.Category != null &&
+                    p.Category.Name.Contains("Dessert"));
+
+            var featuredProducts = await _context.Products
+                .Include(p => p.Category)
+                .OrderByDescending(p => p.Id)
+                .Take(3)
+                .ToListAsync();
+
+            return View(featuredProducts);
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
     }
 }
